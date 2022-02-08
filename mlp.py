@@ -17,15 +17,15 @@ def fetch_data(selected_set):
         test_set = datasets.FashionMNIST(
             root='data', train=False, download=True, transform=ToTensor(),
         )
-        print('FashionMNIST type:')
-        print(type(train_set))
+        # print('FashionMNIST type:')
+        # print(type(train_set))
         return train_set, test_set, 28 * 28, 10
     # Iris dataset
     elif selected_set == '1':
         iris_dataset = CSVDataset('https://raw.githubusercontent.com/jbrownlee/Datasets/master/iris.csv')
         train_set, test_set = iris_dataset.get_split_sets()
-        print('Iris type:')
-        print(type(train_set))
+        # print('Iris type:')
+        # print(type(train_set))
         return train_set, test_set, 4, 3
     # Default dataset. FashionMNIST, in this case
     else:
@@ -38,7 +38,7 @@ def fetch_data(selected_set):
         return train_set, test_set, 28 * 28, 10
 
 
-# Defined a basic Multilayer Perceptron for classification.
+# Define a basic Multilayer Perceptron for classification.
 class MLP(nn.Module):
     # Initializes the net
     def __init__(self, n_inputs, n_outputs):
@@ -66,6 +66,7 @@ def train(dataloader, model, loss_func, optim, device):
     size = len(dataloader.dataset)
     # Set the model into training mode
     model.train()
+    train_losses = []
     # Training loop
     for batch, (X, y) in enumerate(dataloader):
         # Move input and target tensors to gpu if it was available
@@ -74,6 +75,7 @@ def train(dataloader, model, loss_func, optim, device):
         yhat = model(X)
         # Calculate loss
         loss = loss_func(yhat, y)
+        train_losses.append(loss.item()[0])
         #  Do backprop and step down the gradient
         optim.zero_grad()
         loss.backward()
@@ -82,6 +84,7 @@ def train(dataloader, model, loss_func, optim, device):
         # if batch % 100 == 0:
         #     loss, current = loss.item(), batch * len(X)
         #     print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+    return train_losses
 
 
 # Tests the network to check performance
@@ -153,11 +156,15 @@ def run(verbose=True, load=False, train_net=True):
         # Determine how long to run the training based on user input
         epochs = input('How many epochs?\n')
         epochs = int(epochs)
+        losses = []
         # Train and test the data based on the user's selection
         for epoch in range(epochs):
             print(f'Epoch {epoch+1}')
-            train(train_dataloader, model, loss_func, optim, device)
+            losses.append(train(train_dataloader, model, loss_func, optim, device))
             test(test_dataloader, model, loss_func, device)
+        print(losses[0])
+        plt.plot(losses)
+        plt.show()
         torch.save(model.state_dict(), f'mlp{set_choice}.pth')
         print(f'Saved MLP model state to mlp{set_choice}.pth')
     else:

@@ -12,12 +12,15 @@
     focusing on playing with parameters and obtaining reasonable results."""
 
 import mlp
+import conv2dClassifier
 
 
 # Runs one of the models based on the model_num
 def select_model(model_num=0, verbose=False, load=False, train=True):
     if model_num == 0:
         mlp.run(verbose=verbose, load=load, train_net=train)
+    elif model_num == 1:
+        conv2dClassifier.run(verbose=verbose, load=load, train_net=train)
     else:
         print('Invalid selection.')
 
@@ -28,6 +31,7 @@ if __name__ == '__main__':
         # Select a net or quit
         model_num = input('Enter the number to run the corresponding model:\n'
                           '0 - Multilayer Perceptron Classifier\n'
+                          '1 - Convolutional Classifier\n'
                           'Quit - Close program\n')
         if 'quit' in model_num.lower():
             break
